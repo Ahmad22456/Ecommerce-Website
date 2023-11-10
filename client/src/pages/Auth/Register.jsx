@@ -23,7 +23,14 @@ function Register() {
         { name, email, password, phone, address }
       );
       if (res && res.data.success) {
-        toast.success(res.data.message);
+        toast.success(res.data.message, {
+          duration: 6000,
+          style: {
+            borderRadius: "10px",
+            background: "#333",
+            color: "#fff",
+          },
+        });
         navigate("/login");
       } else {
         toast.error(res.data.message);
