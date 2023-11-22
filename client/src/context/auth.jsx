@@ -1,3 +1,4 @@
+import axios from "axios";
 import { useState, useEffect, useContext, createContext } from "react";
 
 const AuthContext = createContext();
@@ -9,6 +10,9 @@ function AuthProvider({ children }) {
     token: "",
   });
 
+  // Default Axios
+  axios.defaults.headers.common["Authorization"] = auth?.token;
+
   useEffect(() => {
     const data = localStorage.getItem("auth");
     if (data) {
@@ -19,6 +23,7 @@ function AuthProvider({ children }) {
         token: parseData.token,
       });
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   return (
     <AuthContext.Provider value={[auth, setAuth]}>
@@ -30,4 +35,5 @@ function AuthProvider({ children }) {
 // Custom Hook
 const useAuth = () => useContext(AuthContext);
 
+// eslint-disable-next-line react-refresh/only-export-components
 export { useAuth, AuthProvider };

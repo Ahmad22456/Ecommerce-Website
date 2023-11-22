@@ -20,7 +20,7 @@ function Register() {
     try {
       const res = await axios.post(
         `http://localhost:8000/api/v1/auth/register`,
-        { name, email, password, phone, address }
+        { name, email, password, phone, address, answer }
       );
       if (res && res.data.success) {
         toast.success(res.data.message, {
@@ -108,7 +108,7 @@ function Register() {
               value={answer}
               onChange={(e) => setAnswer(e.target.value)}
               className="form-control"
-              id="exampleInputEmail1"
+              id="InputAnswer"
               placeholder="What is Your Favorite sports"
               required
             />

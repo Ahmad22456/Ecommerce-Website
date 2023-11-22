@@ -2,7 +2,7 @@ import { useAuth } from "../context/auth";
 import Layout from "../components/Layout/Layout";
 
 function HomePage() {
-  const [auth, setAuth] = useAuth();
+  const [auth] = useAuth();
 
   return (
     <Layout title={"HomePage"}>
