@@ -2,6 +2,7 @@ import ReactDOM from "react-dom/client";
 import { BrowserRouter } from "react-router-dom";
 import { AuthProvider } from "./context/auth.jsx";
 import "bootstrap/dist/css/bootstrap.min.css";
+import "antd/dist/reset.css";
 import App from "./App.jsx";
 import "./index.css";
 
