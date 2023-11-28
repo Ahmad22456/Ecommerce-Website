@@ -126,20 +126,20 @@ export async function forgotPasswordController(req, res) {
     const { email, answer, newPassword } = req.body;
 
     if (!email) {
-      res.status(400).send({ message: "Email is required" });
+      return res.status(400).send({ message: "Email is required" });
     }
     if (!answer) {
-      res.status(400).send({ message: "answer is required" });
+      return res.status(400).send({ message: "answer is required" });
     }
     if (!newPassword) {
-      res.status(400).send({ message: "New password is required" });
+      return res.status(400).send({ message: "New password is required" });
     }
 
     // Check
     const user = await userModel.findOne({ email, answer });
 
     if (!user) {
-      res.status(404).send({
+      return res.status(404).send({
         success: false,
         message: "Email or Answer is wrong",
       });
