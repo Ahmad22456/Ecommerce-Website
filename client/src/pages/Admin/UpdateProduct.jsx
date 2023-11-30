@@ -4,13 +4,14 @@ import Layout from "../../components/Layout/Layout";
 import axios from "axios";
 import toast from "react-hot-toast";
 import { Select } from "antd";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 
 const { Option } = Select;
 
-function CreateProduct() {
+function UpdateProduct() {
   const [categories, setCategories] = useState([]);
   const [name, setName] = useState("");
+  const [id, setId] = useState("");
   const [description, setDescription] = useState("");
   const [price, setPrice] = useState("");
   const [category, setCategory] = useState("");
@@ -18,6 +19,30 @@ function CreateProduct() {
   const [photo, setPhoto] = useState("");
   const [shipping, setShipping] = useState("");
   const navigate = useNavigate();
+  const params = useParams();
+
+  // Get Single Product
+  async function getSingleProduct() {
+    try {
+      const { data } = await axios.get(
+        `http://localhost:8000/api/v1/product/get-product/${params.slug}`
+      );
+      setName(data.product.name);
+      setId(data.product._id);
+      setDescription(data.product.description);
+      setPrice(data.product.price);
+      setCategory(data.product.category._id);
+      setQuantity(data.product.quantity);
+      setShipping(data.product.shipping);
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+  useEffect(() => {
+    getSingleProduct();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // Get All Categories
   async function getAllCategory() {
@@ -38,8 +63,8 @@ function CreateProduct() {
     getAllCategory();
   }, []);
 
-  // Create Product Function
-  async function handleCreate(e) {
+  // Update Product Function
+  async function handleUpdate(e) {
     e.preventDefault();
     try {
       const productData = new FormData();
@@ -48,15 +73,16 @@ function CreateProduct() {
       productData.append("price", price);
       productData.append("category", category);
       productData.append("quantity", quantity);
-      productData.append("photo", photo);
-      const { data } = await axios.post(
-        "http://localhost:8000/api/v1/product/create-product",
+      photo && productData.append("photo", photo); // condition operators without conditions (if) ??
+      console.log(productData);
+      const { data } = axios.put(
+        `http://localhost:8000/api/v1/product/update-product/${id}`, // he doesn't wait for the promise is for faster loading ?? (flipped conditions)
         productData
       );
       if (data?.success) {
         toast.error(data?.message);
       } else {
-        toast.success("Product Created Successfully");
+        toast.success("Product Updated Successfully");
         navigate("/dashboard/admin/products");
       }
     } catch (error) {
@@ -65,15 +91,33 @@ function CreateProduct() {
     }
   }
 
+  // Delete Product
+  async function handleDelete() {
+    try {
+      let answer = window.prompt(
+        "Are you sure you want to delete this product ?"
+      );
+      if (!answer) return;
+      const { data } = await axios.delete(
+        `http://localhost:8000/api/v1/product/delete-product/${id}`
+      );
+      toast.success("Product Deleted Successfully");
+      navigate("/dashboard/admin/products");
+    } catch (error) {
+      console.log(error);
+      toast.error("Something went Wrong");
+    }
+  }
+
   return (
-    <Layout title={"Dashboard - Create Product"}>
+    <Layout title={"Dashboard - Update Product"}>
       <div className="container-fluid m-3 p-3">
         <div className="row">
           <div className="col-md-3">
             <AdminMenu />
           </div>
           <div className="col-md-9">
-            <h1>Create Product</h1>
+            <h1>Update Product</h1>
             <div className="m-1 w-75">
               <Select
                 bordered={false}
@@ -84,6 +128,7 @@ function CreateProduct() {
                 onChange={(value) => {
                   setCategory(value);
                 }}
+                value={category}
               >
                 {categories?.map((c) => (
                   <Option key={c._id} value={c._id}>
@@ -104,10 +149,19 @@ function CreateProduct() {
                 </label>
               </div>
               <div className="mb-3">
-                {photo && (
+                {photo ? (
                   <div className="text-center">
                     <img
                       src={URL.createObjectURL(photo)}
+                      alt="product_photo"
+                      height={"200px"}
+                      className="img img-responsive"
+                    />
+                  </div>
+                ) : (
+                  <div className="text-center">
+                    <img
+                      src={`http://localhost:8000/api/v1/product/product-photo/${id}`}
                       alt="product_photo"
                       height={"200px"}
                       className="img img-responsive"
@@ -161,14 +215,20 @@ function CreateProduct() {
                   onChange={(value) => {
                     setShipping(value);
                   }}
+                  value={shipping ? "Yes" : "No"}
                 >
                   <Option value="0">No</Option>
                   <Option value="1">Yes</Option>
                 </Select>
               </div>
               <div className="mb-3">
-                <button className="btn btn-primary" onClick={handleCreate}>
-                  CREATE PRODUCT
+                <button className="btn btn-primary" onClick={handleUpdate}>
+                  UPDATE PRODUCT
+                </button>
+              </div>
+              <div className="mb-3">
+                <button className="btn btn-danger" onClick={handleDelete}>
+                  DELETE PRODUCT
                 </button>
               </div>
             </div>
@@ -179,4 +239,4 @@ function CreateProduct() {
   );
 }
 
-export default CreateProduct;
+export default UpdateProduct;

@@ -51,7 +51,7 @@ export async function createProductController(req, res) {
 // Update Product Controller
 export async function updateProductController(req, res) {
   try {
-    const { name, slug, description, price, category, quantity, shipping } =
+    const { name, description, price, category, quantity, shipping } =
       req.fields;
     const { photo } = req.files;
 
@@ -67,10 +67,10 @@ export async function updateProductController(req, res) {
         return res.status(500).send({ Error: "Category is Required" });
       case !quantity:
         return res.status(500).send({ Error: "Quantity is Required" });
-      case !photo && photo.size > 1000000:
+      case photo && photo.size > 1000000:
         return res
           .status(500)
-          .send({ Error: "Photo is Required and should be more than 1mb" });
+          .send({ Error: "Photo is Required and should be less than 1mb" }); // does this mean he doesn't want a photo
     }
 
     const products = await productModel.findByIdAndUpdate(
@@ -82,6 +82,7 @@ export async function updateProductController(req, res) {
       products.photo.data = fs.readFileSync(photo.path);
       products.photo.contentType = photo.type;
     }
+    await products.save(); // do we need this we didn't use it in updating category
     res.status(201).send({
       success: true,
       message: "Product updated successfully",
