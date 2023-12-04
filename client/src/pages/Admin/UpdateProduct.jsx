@@ -73,17 +73,17 @@ function UpdateProduct() {
       productData.append("price", price);
       productData.append("category", category);
       productData.append("quantity", quantity);
-      photo && productData.append("photo", photo); // condition operators without conditions (if) ??
+      photo && productData.append("photo", photo);
       console.log(productData);
-      const { data } = axios.put(
-        `http://localhost:8000/api/v1/product/update-product/${id}`, // he doesn't wait for the promise is for faster loading ?? (flipped conditions)
+      const { data } = await axios.put(
+        `http://localhost:8000/api/v1/product/update-product/${id}`,
         productData
       );
       if (data?.success) {
-        toast.error(data?.message);
-      } else {
         toast.success("Product Updated Successfully");
         navigate("/dashboard/admin/products");
+      } else {
+        toast.error(data?.message);
       }
     } catch (error) {
       console.log(error);
@@ -98,6 +98,7 @@ function UpdateProduct() {
         "Are you sure you want to delete this product ?"
       );
       if (!answer) return;
+      // eslint-disable-next-line no-unused-vars
       const { data } = await axios.delete(
         `http://localhost:8000/api/v1/product/delete-product/${id}`
       );

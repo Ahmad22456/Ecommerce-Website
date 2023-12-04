@@ -1,10 +1,14 @@
 import Layout from "../components/Layout/Layout";
-import { useEffect, useState } from "react";
 import axios from "axios";
+import toast from "react-hot-toast";
+import { useEffect, useState } from "react";
 import { Checkbox, Radio } from "antd";
 import { Prices } from "../components/Prices";
+import { useNavigate } from "react-router-dom";
+import { useCart } from "../context/cart";
 
 function HomePage() {
+  const [cart, setCart] = useCart();
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
   const [checked, setChecked] = useState([]);
@@ -12,6 +16,8 @@ function HomePage() {
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(false);
+
+  const navigate = useNavigate();
 
   // Get All Categories
   async function getAllCategory() {
@@ -61,6 +67,7 @@ function HomePage() {
   useEffect(() => {
     if (page === 1) return;
     loadMore();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [page]);
 
   // Load More
@@ -71,6 +78,7 @@ function HomePage() {
         `http://localhost:8000/api/v1/product/product-list/${page}`
       );
       setLoading(false);
+      // eslint-disable-next-line no-unsafe-optional-chaining
       setProducts([...products, ...data?.products]);
     } catch (error) {
       console.log(error);
@@ -91,6 +99,7 @@ function HomePage() {
 
   useEffect(() => {
     if (!checked.length || !radio.length) getAllProducts();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [checked.length, radio.length]);
 
   useEffect(() => {
@@ -129,7 +138,6 @@ function HomePage() {
           {/* Price Filter */}
           <h4 className="text-center mt-4">Filter By Price</h4>
           <div className="d-flex flex-column">
-            {/* what is this ? */}
             <Radio.Group onChange={(e) => setRadio(e.target.value)}>
               {Prices.map((p) => (
                 <div key={p._id}>
@@ -163,8 +171,23 @@ function HomePage() {
                     {p.description.substring(0, 30)}...
                   </p>
                   <p className="card-text">$ {p.price}</p>
-                  <button className="btn btn-primary ms-1">More Details</button>
-                  <button className="btn btn-secondary ms-1">
+                  <button
+                    className="btn btn-primary ms-1"
+                    onClick={() => navigate(`/product/${p.slug}`)}
+                  >
+                    More Details
+                  </button>
+                  <button
+                    className="btn btn-secondary ms-1"
+                    onClick={() => {
+                      setCart([...cart, p]);
+                      localStorage.setItem(
+                        "cart",
+                        JSON.stringify([...cart, p])
+                      );
+                      toast.success("Item Added to Cart");
+                    }}
+                  >
                     Add to Cart
                   </button>
                 </div>

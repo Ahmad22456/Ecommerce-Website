@@ -18,15 +18,15 @@ function CreateCategory() {
     e.preventDefault();
     try {
       const { data } = await axios.post(
-        "http://localhost:8000/api/v1/category/create-category", // how are we getting the name ??
+        "http://localhost:8000/api/v1/category/create-category",
         { name }
       );
       console.log(data);
       if (data?.success) {
         toast.success(`${name} has been created`);
-        getAllCategory(); // how can we call a function that is declared under it ??
+        getAllCategory();
       } else {
-        toast.error(data.message); // why do we need an else for failture when we have try and catch ??
+        toast.error(data.message);
       }
     } catch (error) {
       console.log(error);

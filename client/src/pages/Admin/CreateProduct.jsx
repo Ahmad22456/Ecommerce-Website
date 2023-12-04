@@ -16,6 +16,7 @@ function CreateProduct() {
   const [category, setCategory] = useState("");
   const [quantity, setQuantity] = useState("");
   const [photo, setPhoto] = useState("");
+  // eslint-disable-next-line no-unused-vars
   const [shipping, setShipping] = useState("");
   const navigate = useNavigate();
 

@@ -1,4 +1,5 @@
 import fs from "fs";
+import categoryModel from "../models/categoryModel.js";
 import productModel from "../models/productModel.js";
 import slugify from "slugify";
 
@@ -21,7 +22,7 @@ export async function createProductController(req, res) {
         return res.status(500).send({ Error: "Category is Required" });
       case !quantity:
         return res.status(500).send({ Error: "Quantity is Required" });
-      case !photo && photo.size > 1000000:
+      case photo && photo.size > 1000000:
         return res
           .status(500)
           .send({ Error: "Photo is Required and should be more than 1mb" });
@@ -70,7 +71,7 @@ export async function updateProductController(req, res) {
       case photo && photo.size > 1000000:
         return res
           .status(500)
-          .send({ Error: "Photo is Required and should be less than 1mb" }); // does this mean he doesn't want a photo
+          .send({ Error: "Photo is Required and should be less than 1mb" });
     }
 
     const products = await productModel.findByIdAndUpdate(
@@ -82,7 +83,7 @@ export async function updateProductController(req, res) {
       products.photo.data = fs.readFileSync(photo.path);
       products.photo.contentType = photo.type;
     }
-    await products.save(); // do we need this we didn't use it in updating category
+    await products.save();
     res.status(201).send({
       success: true,
       message: "Product updated successfully",
@@ -183,7 +184,6 @@ export async function deleteProductController(req, res) {
 
 // Product Filters Controller
 export async function productFiltersController(req, res) {
-  // ???
   try {
     const { checked, radio } = req.body;
     let args = {};
@@ -227,7 +227,7 @@ export async function productListController(req, res) {
   try {
     const perPage = 1;
     const page = req.params.page ? req.params.page : 1;
-    const products = await productModel // what are all these conditions ??
+    const products = await productModel
       .find({})
       .select("-photo")
       .skip((page - 1) * perPage)
@@ -243,6 +243,75 @@ export async function productListController(req, res) {
       success: false,
       message: "Error in product page controller",
       error,
+    });
+  }
+}
+
+// Product Search Controller
+export async function searchProductController(req, res) {
+  try {
+    const { keyword } = req.params;
+    const results = await productModel
+      .find({
+        $or: [
+          { name: { $regex: keyword, $options: "i" } },
+          { description: { $regex: keyword, $options: "i" } },
+        ],
+      })
+      .select("-photo");
+    res.json(results);
+  } catch (error) {
+    console.log(error);
+    res.status(400).send({
+      success: false,
+      message: "Error in search product api",
+      error,
+    });
+  }
+}
+
+// Similar Products Controller
+export async function realtedProductController(req, res) {
+  try {
+    const { pid, cid } = req.params;
+    const products = await productModel
+      .find({
+        category: cid,
+        _id: { $ne: pid },
+      })
+      .select("-photo")
+      .limit(3)
+      .populate("category");
+    res.status(200).send({
+      success: true,
+      products,
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(400).send({
+      success: false,
+      message: "error while geting related product",
+      error,
+    });
+  }
+}
+
+// Get Product by Category
+export async function productCategoryController(req, res) {
+  try {
+    const category = await categoryModel.findOne({ slug: req.params.slug });
+    const products = await productModel.find({ category }).populate("category");
+    res.status(200).send({
+      success: true,
+      category,
+      products,
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(400).send({
+      success: false,
+      error,
+      message: "Error While Getting products",
     });
   }
 }
